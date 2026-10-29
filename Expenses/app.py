@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from pathlib import Path
 
 st.set_page_config(
     page_title="Smart Expense Intelligence",
@@ -13,16 +12,32 @@ st.title("💸 Smart Expense Intelligence")
 st.write("Explore your spending and understand where your money goes.")
 
 # Load your cleaned dataset
-file_path = Path("cleaned_expenses.csv")
+import random
+from datetime import datetime, timedelta
 
-if not file_path.exists():
-    st.error("Could not find cleaned_expenses.csv. Make sure it is in your Expenses folder.")
-    st.stop()
+random.seed(42)
 
-df = pd.read_csv(file_path)
-df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
-df = df.dropna(subset=["Date", "Amount", "Category"])
+if "Date" not in st.session_state:
+    categories = [
+        "Food", "Transport", "Shopping",
+        "Entertainment", "Health", "Rent", "Utilities"
+    ]
+
+    payment_modes = ["Cash", "Card", "Online"]
+    expenses = []
+
+    for i in range(200):
+        expenses.append({
+            "Date": datetime.today() - timedelta(days=random.randint(0, 365)),
+            "Category": random.choice(categories),
+            "Amount": random.randint(50, 2000),
+            "Payment_Mode": random.choice(payment_modes),
+        })
+
+    st.session_state["Date"] = expenses
+
+df = pd.DataFrame(st.session_state["Date"])
+df["Date"] = pd.to_datetime(df["Date"])
 
 # Sidebar filters
 st.sidebar.header("Filter expenses")
